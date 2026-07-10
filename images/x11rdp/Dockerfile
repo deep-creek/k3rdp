@@ -2,7 +2,7 @@ FROM debian:bookworm-slim
 
 # X11/RDP server pod:
 #   Xvfb   -> a persistent, TCP-reachable virtual display :0
-#   openbox-> a lightweight window manager for that display
+#   icewm  -> window manager in kiosk mode: one borderless fullscreen app
 #   x11vnc -> exports display :0 over VNC on :5900
 #   xrdp   -> speaks RDP on :3389, bridging to x11vnc via its libvnc.so module
 #
@@ -13,7 +13,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
         xvfb \
         x11vnc \
-        openbox \
+        icewm \
         xrdp \
         x11-utils \
         x11-xserver-utils \
@@ -28,6 +28,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY xrdp.ini /etc/xrdp/xrdp.ini
 COPY supervisord.conf /etc/supervisor/supervisord.conf
 COPY start-x11.sh /usr/local/bin/start-x11.sh
+# IceWM kiosk config: no taskbar, single borderless fullscreen app.
+# Debian's IceWM reads system config from /etc/X11/icewm (its CFGDIR).
+COPY icewm/ /etc/X11/icewm/
 RUN chmod +x /usr/local/bin/start-x11.sh
 
 # Display geometry / DPI (overridable at runtime via env in the Deployment).

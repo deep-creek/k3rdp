@@ -67,6 +67,9 @@ int main(int argc, char **argv)
         counter->setText(QString("Clicks: %1").arg(++clicks));
     });
 
-    window.show();
+    // Kiosk display: a single borderless, fullscreen window. This sets
+    // _NET_WM_STATE_FULLSCREEN, which IceWM honors by dropping all decorations
+    // and covering the whole 1024x1024 screen.
+    window.showFullScreen();
     return app.exec();
 }

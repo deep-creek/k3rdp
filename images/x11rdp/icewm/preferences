@@ -1,0 +1,25 @@
+# IceWM kiosk preferences for k3rdp.
+#
+# Goal: display a single application fullscreen with no chrome. Everything that
+# would let a user manage/switch windows or reveal desktop UI is turned off.
+
+# No taskbar at all.
+ShowTaskBar=0
+
+# No window-switching / desktop affordances.
+QuickSwitch=0
+EdgeSwitch=0
+ClickToFocus=1
+MinimizeToDesktop=0
+
+# Single workspace, no pager.
+WorkspaceNames=" "
+
+# Plain black desktop behind the (fullscreen) app.
+DesktopBackgroundColor="rgb:00/00/00"
+DesktopBackgroundImage=""
+
+# Don't play sounds or show tooltips/menus we don't need.
+ShowThemeMenu=0
+ShowProgramsMenu=0
+ShowSettingsMenu=0

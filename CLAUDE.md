@@ -56,11 +56,20 @@ qtapp pod ──TCP :6000──► Xvfb :0 (shared)  ◄── x11vnc :5900 ◄�
                           (1024x1024, 96dpi, -listen tcp -ac)                  (localhost:3389)
 ```
 
-All of Xvfb + openbox + x11vnc + xrdp run in the **one** `x11rdp` pod, sequenced
+All of Xvfb + icewm + x11vnc + xrdp run in the **one** `x11rdp` pod, sequenced
 by supervisord (`images/x11rdp/supervisord.conf`); `start-x11.sh` waits for Xvfb
-to be ready (polls `xdpyinfo`) before launching openbox/x11vnc to avoid races.
+to be ready (polls `xdpyinfo`) before launching icewm/x11vnc to avoid races.
 xrdp uses its `libvnc.so` module (configured in `images/x11rdp/xrdp.ini`,
 `autorun=x11vnc`) to bridge RDP to the running x11vnc — **not** xrdp-sesman.
+
+**Kiosk window mode:** IceWM runs in kiosk mode (config in
+`images/x11rdp/icewm/`, copied to Debian's `/etc/X11/icewm` CFGDIR — *not*
+`/etc/icewm`). `preferences` hides the taskbar; the single borderless-fullscreen
+look is driven primarily by the **app** calling `showFullScreen()`
+(sets `_NET_WM_STATE_FULLSCREEN`, which IceWM honors by removing all
+decorations), with `winoptions` (matched on `WM_CLASS`, value `0` = remove
+decoration) as a WM-side fallback. Note IceWM applies `winoptions` only at window
+**map** time — restarting icewm does not re-decorate already-open windows.
 
 Two Services select the same pod (`manifests/`):
 - `x11rdp-rdp` — **LoadBalancer** :3389, exposed to the host via k3d's serverlb

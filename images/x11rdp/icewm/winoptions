@@ -1,0 +1,23 @@
+# Per-application window options (matched on WM_CLASS instance/class).
+#
+# Primary mechanism for the borderless-fullscreen kiosk is the app itself calling
+# showFullScreen() (sets _NET_WM_STATE_FULLSCREEN, which IceWM honors). These
+# winoptions are a WM-side fallback for apps that do NOT self-fullscreen: they
+# strip every decoration from the window. Per this IceWM build's shipped
+# reference (/usr/share/icewm/winoptions), value 0 = remove that decoration.
+#
+# The sample Qt app has WM_CLASS "qtapp". Swapping in a different app? Find its
+# WM_CLASS with:
+#   kubectl -n k3rdp exec deploy/x11rdp -- bash -c 'DISPLAY=:0 xprop WM_CLASS'  (then click it)
+# and duplicate these lines with that name.
+
+qtapp.dTitleBar: 0
+qtapp.dBorder: 0
+qtapp.dSysMenu: 0
+qtapp.dClose: 0
+qtapp.dMinimize: 0
+qtapp.dMaximize: 0
+qtapp.dResize: 0
+qtapp.ignoreTaskBar: 1
+qtapp.ignoreWinList: 1
+qtapp.ignoreQuickSwitch: 1

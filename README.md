@@ -12,7 +12,7 @@ from a separate pod over TCP.
         ┌───────────────────── Pod: x11rdp ─────────────────────┐
         │  Xvfb :0  (1024x1024x24, -dpi 96, -listen tcp, -ac)    │◄── X11 TCP :6000
         │     ▲ shared display :0                                 │      │  (ClusterIP
-        │  openbox (WM)                                           │      │   Service
+        │  icewm (kiosk WM)                                       │      │   Service
         │  x11vnc  ──► :5900  (-nopw, -shared, -forever)          │      │   :6000)
         │  xrdp    ──► :3389  (libvnc.so module → 127.0.0.1:5900) │      │
         └────────────────────────────────────────────────────────┘      │
@@ -24,6 +24,8 @@ from a separate pod over TCP.
 ```
 
 **Display:** 1024×1024, 24-bit, 96 DPI. **RDP auth:** none (auto-attaches).
+**Window mode:** kiosk — IceWM shows a single **borderless, fullscreen** app with
+no taskbar or decorations.
 
 ## Why this design
 
@@ -87,7 +89,12 @@ your own app:
    or adjust `images/qtapp/Dockerfile`'s `COPY --from=build /out/bin/qtapp ...`).
 2. Ensure your app uses the X11/xcb platform (already forced via
    `QT_QPA_PLATFORM=xcb`) and honors `DISPLAY`.
-3. Rebuild and redeploy:
+3. For the borderless-fullscreen kiosk look, have your top-level window call
+   `showFullScreen()` (the sample does). This sets `_NET_WM_STATE_FULLSCREEN`,
+   which IceWM honors by dropping all decorations. As a WM-side fallback for apps
+   that can't self-fullscreen, add your window's `WM_CLASS` to
+   `images/x11rdp/icewm/winoptions` (see that file's header for how to find it).
+4. Rebuild and redeploy:
    ```bash
    scripts/build-images.sh
    kubectl -n k3rdp rollout restart deploy/qtapp
@@ -110,7 +117,7 @@ Match the RDP client `/size:` accordingly.
 |------|---------|
 | `setup.sh` | Install tooling (dnf packages + k3d binary in `/usr/bin`). |
 | `scripts/` | `create-cluster`, `build-images`, `deploy`, `connect`, `destroy`. |
-| `images/x11rdp/` | Xvfb + openbox + x11vnc + xrdp image and its config. |
+| `images/x11rdp/` | Xvfb + icewm + x11vnc + xrdp image and its config. |
 | `images/qtapp/` | Sample Qt Widgets app + multi-stage build. |
 | `manifests/` | Kustomize: namespace, deployments, RDP + display services. |
 

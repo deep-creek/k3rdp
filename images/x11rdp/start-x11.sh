@@ -26,9 +26,10 @@ if [[ "${ready:-0}" -ne 1 ]]; then
 fi
 echo "[start-x11] X server ${DISPLAY} is up"
 
-# Lightweight window manager so Qt windows are managed/decorated.
-openbox &
-echo "[start-x11] openbox started (pid $!)"
+# IceWM in kiosk mode (config in /etc/icewm): a single borderless fullscreen
+# app, no taskbar. Run the bare WM only (no icewmbg/icewmtray).
+icewm &
+echo "[start-x11] icewm started (pid $!)"
 
 # Export the shared display over VNC (foreground process).
 echo "[start-x11] starting x11vnc on port ${VNC_PORT}"
