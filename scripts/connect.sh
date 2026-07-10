@@ -12,7 +12,7 @@ set -euo pipefail
 
 HOST="${RDP_HOST:-localhost}"
 PORT="${RDP_PORT:-3389}"
-SIZE="${RDP_SIZE:-1624x1024}"   # full framebuffer (primary 1024x1024 + secondary 600x400)
+SIZE="${RDP_SIZE:-1024x1024}"
 USER="${RDP_USER:-kiosk}"
 DOMAIN="${RDP_DOMAIN:-k3rdp}"
 PASSWORD="${RDP_PASSWORD:-kiosk}"

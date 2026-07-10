@@ -22,24 +22,10 @@ spec:
           env:
             - name: DISPLAY_NUM
               value: "0"
-            # Primary monitor: 1024x1024 @ 96 DPI, placed to the right so the
-            # secondary can sit at its left with bottom edges aligned.
             - name: SCREEN_GEOMETRY
               value: "1024x1024x24"
             - name: SCREEN_DPI
               value: "96"
-            - name: PRIMARY_POS
-              value: "+600+0"
-            # Secondary monitor: 600x400 @ 120 DPI, left of primary, bottom-aligned.
-            # (framebuffer becomes 1624x1024; top-left 600x624 is unused.)
-            - name: SECONDARY_ENABLE
-              value: "1"
-            - name: SECONDARY_GEOMETRY
-              value: "600x400"
-            - name: SECONDARY_DPI
-              value: "120"
-            - name: SECONDARY_POS
-              value: "+0+624"
             - name: VNC_PORT
               value: "5900"
           ports:
