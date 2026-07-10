@@ -1,0 +1,19 @@
+# External RDP entry point. type: LoadBalancer so k3s servicelb (klipper)
+# exposes it, and the k3d serverlb forwards host localhost:3389 to it
+# (see scripts/create-cluster.sh: --port "3389:3389@loadbalancer").
+apiVersion: v1
+kind: Service
+metadata:
+  name: x11rdp-rdp
+  namespace: k3rdp
+  labels:
+    app: x11rdp
+spec:
+  type: LoadBalancer
+  selector:
+    app: x11rdp
+  ports:
+    - name: rdp
+      port: 3389
+      targetPort: 3389
+      protocol: TCP

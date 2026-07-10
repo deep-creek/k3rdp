@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qtapp
+  namespace: k3rdp
+  labels:
+    app: qtapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qtapp
+  template:
+    metadata:
+      labels:
+        app: qtapp
+    spec:
+      containers:
+        - name: qtapp
+          image: k3rdp/qtapp:dev
+          imagePullPolicy: IfNotPresent
+          env:
+            # Render into the shared display in the x11rdp pod, over TCP.
+            - name: DISPLAY
+              value: "x11rdp-display.k3rdp.svc.cluster.local:0"
+            - name: QT_QPA_PLATFORM
+              value: "xcb"
+            - name: QT_FONT_DPI
+              value: "96"
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi

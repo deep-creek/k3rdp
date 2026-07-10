@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: x11rdp
+  namespace: k3rdp
+  labels:
+    app: x11rdp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: x11rdp
+  template:
+    metadata:
+      labels:
+        app: x11rdp
+    spec:
+      containers:
+        - name: x11rdp
+          image: k3rdp/x11rdp:dev
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: DISPLAY_NUM
+              value: "0"
+            - name: SCREEN_GEOMETRY
+              value: "1024x1024x24"
+            - name: SCREEN_DPI
+              value: "96"
+            - name: VNC_PORT
+              value: "5900"
+          ports:
+            - name: rdp
+              containerPort: 3389
+            - name: x11
+              containerPort: 6000
+          readinessProbe:
+            tcpSocket:
+              port: 3389
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: 6000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
