@@ -5,7 +5,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
         cmake \
-        qtbase5-dev \
+        qt6-base-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /src
@@ -20,9 +20,11 @@ FROM debian:bookworm-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        libqt5widgets5 \
-        libqt5gui5 \
-        libqt5core5a \
+        libqt6widgets6 \
+        libqt6gui6 \
+        libqt6core6 \
+        qt6-qpa-plugins \
+        libxcb-cursor0 \
         libxcb-xinerama0 \
         libxcb-icccm4 \
         libxcb-image0 \

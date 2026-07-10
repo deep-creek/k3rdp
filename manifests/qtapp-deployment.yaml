@@ -25,8 +25,12 @@ spec:
               value: "x11rdp-display.k3rdp.svc.cluster.local:0"
             - name: QT_QPA_PLATFORM
               value: "xcb"
-            - name: QT_FONT_DPI
-              value: "96"
+            # No global QT_FONT_DPI: let Qt read each monitor's DPI from RandR so
+            # the 96 DPI primary and 120 DPI secondary scale independently.
+            # (Qt6 enables high-DPI scaling unconditionally.) PassThrough keeps
+            # the exact 1.25x factor for 120 DPI instead of rounding to 1x.
+            - name: QT_SCALE_FACTOR_ROUNDING_POLICY
+              value: "PassThrough"
           resources:
             requests:
               cpu: 50m
