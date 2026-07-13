@@ -6,7 +6,7 @@ from a separate pod over TCP.
 
 ```
  RDP client (host)                         k3d cluster (Docker)
- xfreerdp/remmina ──► localhost:3389 ─┐
+ xfreerdp/remmina ──► localhost:33389 ─┐
                                       │  k3d serverlb → Service(LoadBalancer) :3389
                                       ▼
         ┌───────────────────── Pod: x11rdp ─────────────────────┐
@@ -23,8 +23,8 @@ from a separate pod over TCP.
         └────────────────────────────────────────────────────────┘
 ```
 
-**Display:** 1024×1024, 24-bit, 96 DPI. **Access:** RDP (`localhost:3389`) *or*
-VNC (`localhost:5900`) — both view the same shared display. **Auth:** none.
+**Display:** 1024×1024, 24-bit, 96 DPI. **Access:** RDP (`localhost:33389`) *or*
+VNC (`localhost:35900`) — both view the same shared display. **Auth:** none.
 **Window mode:** kiosk — IceWM shows a single **borderless, fullscreen** app with
 no taskbar or decorations.
 
@@ -45,11 +45,11 @@ with **x11vnc**, and puts **xrdp** (its `libvnc.so` module) in front to speak RD
 
 ```bash
 sudo ./setup.sh                 # installs kubectl, kustomize, helm, freerdp, tigervnc (dnf) + k3d (/usr/bin)
-scripts/create-cluster.sh       # create the k3d cluster, map host :3389 (RDP) + :5900 (VNC)
+scripts/create-cluster.sh       # create the k3d cluster, map host :33389 (RDP) + :35900 (VNC)
 scripts/build-images.sh         # build x11rdp + qtapp images, import into k3d
 scripts/deploy.sh               # apply manifests, wait for pods
-scripts/connect-rdp.sh          # open an RDP session to localhost:3389
-scripts/connect-vnc.sh          # …or a VNC session to localhost:5900
+scripts/connect-rdp.sh          # open an RDP session to localhost:33389
+scripts/connect-vnc.sh          # …or a VNC session to localhost:35900
 ```
 
 Tear everything down:
@@ -64,17 +64,17 @@ xrdp and x11vnc are two front-ends onto the **same** shared display `:0`, so RDP
 and VNC show identical content. Both are exposed on loopback with no password.
 
 **RDP** — `scripts/connect-rdp.sh` (uses `xfreerdp`). Any RDP client works against
-`localhost:3389`:
+`localhost:33389`:
 
 ```bash
-xfreerdp /v:localhost:3389 /size:1024x1024 /cert:ignore   # Remmina, mstsc, … also work
+xfreerdp /v:localhost:33389 /size:1024x1024 /cert:ignore   # Remmina, mstsc, … also work
 ```
 
 **VNC** — `scripts/connect-vnc.sh` (uses `vncviewer`). Any VNC client works against
-`localhost:5900`:
+`localhost:35900`:
 
 ```bash
-vncviewer localhost::5900        # no password
+vncviewer localhost::35900       # no password
 ```
 
 ## Verifying it works
@@ -138,6 +138,6 @@ Match the RDP client `/size:` accordingly.
 
 `Xvfb -ac` disables X access control, and **both RDP and VNC require no login**
 (x11vnc runs `-nopw`). This is safe here because the X11 display is only reachable
-via a **ClusterIP** Service inside the cluster, and the RDP (3389) and VNC (5900)
-ports are bound to `127.0.0.1` on your machine. Do **not** expose this to
+via a **ClusterIP** Service inside the cluster, and the RDP (33389) and VNC (35900)
+host ports are bound to `127.0.0.1` on your machine. Do **not** expose this to
 untrusted networks without adding authentication.

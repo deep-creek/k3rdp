@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# connect-vnc.sh — open a VNC session to the shared display at localhost:5900.
+# connect-vnc.sh — open a VNC session to the shared display at localhost:35900.
 #
 # Uses a VNC viewer (Fedora package: tigervnc, provides `vncviewer`). The x11vnc
 # server runs with -nopw, so no password is required. It exports the same shared
@@ -9,7 +9,7 @@
 set -euo pipefail
 
 HOST="${VNC_HOST:-localhost}"
-PORT="${VNC_PORT:-5900}"
+PORT="${VNC_PORT:-35900}"
 
 if command -v vncviewer >/dev/null 2>&1; then
   echo "==> Connecting vncviewer to ${HOST}:${PORT} (no password)"

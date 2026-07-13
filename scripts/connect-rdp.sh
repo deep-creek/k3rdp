@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# connect.sh — open an RDP session to the shared display at localhost:3389.
+# connect-rdp.sh — open an RDP session to the shared display at localhost:33389.
 #
 # Uses xfreerdp (Fedora package: freerdp). The xrdp server auto-attaches to the
 # shared x11vnc/Xvfb display and does not validate credentials (the VNC backend
@@ -11,7 +11,7 @@
 set -euo pipefail
 
 HOST="${RDP_HOST:-localhost}"
-PORT="${RDP_PORT:-3389}"
+PORT="${RDP_PORT:-33389}"
 SIZE="${RDP_SIZE:-1024x1024}"
 USER="${RDP_USER:-kiosk}"
 DOMAIN="${RDP_DOMAIN:-k3rdp}"
