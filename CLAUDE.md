@@ -6,8 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A self-contained local k3d (Kubernetes-in-Docker) stack that runs a **shared X11
 display served over RDP**, into which a **C++ Qt6 application renders from a
-separate pod over TCP**. Display is fixed at **1024×1024, 24-bit, 96 DPI**; RDP
-requires **no authentication**. Target platform is **Fedora + Docker**. (A
+separate pod over TCP**. Display is fixed at **1024×1024, 24-bit, 96 DPI**, viewable
+over **RDP (`localhost:3389`) or VNC (`localhost:5900`)** with **no authentication**.
+Target platform is **Fedora + Docker**. (A
 two-monitor, per-monitor-DPI variant lives on the `multi-monitor` branch.)
 
 ## Workflow commands
@@ -19,7 +20,8 @@ sudo ./setup.sh              # install kubectl/kustomize/helm/freerdp (dnf) + k3
 scripts/create-cluster.sh    # create k3d cluster 'k3rdp', map host :3389 -> RDP
 scripts/build-images.sh      # docker build both images, then `k3d image import` them
 scripts/deploy.sh            # kubectl apply -k manifests/ + wait for rollout
-scripts/connect.sh           # xfreerdp to localhost:3389 (no login)
+scripts/connect-rdp.sh       # xfreerdp to localhost:3389 (no login)
+scripts/connect-vnc.sh       # vncviewer to localhost:5900 (no password)
 scripts/destroy.sh           # k3d cluster delete
 ```
 
@@ -72,10 +74,14 @@ decorations), with `winoptions` (matched on `WM_CLASS`, value `0` = remove
 decoration) as a WM-side fallback. Note IceWM applies `winoptions` only at window
 **map** time — restarting icewm does not re-decorate already-open windows.
 
-Two Services select the same pod (`manifests/`):
-- `x11rdp-rdp` — **LoadBalancer** :3389, exposed to the host via k3d's serverlb
-  (`create-cluster.sh` maps `3389:3389@loadbalancer`). RDP is raw TCP, so Traefik
-  ingress is deliberately not used.
+Three Services select the same pod (`manifests/`). The display can be viewed over
+**RDP or VNC** — both front-ends onto the same shared `:0`:
+- `x11rdp-rdp` — **LoadBalancer** :3389 (RDP), exposed to the host via k3d's
+  serverlb (`create-cluster.sh` maps `127.0.0.1:3389:3389@loadbalancer`).
+- `x11rdp-vnc` — **LoadBalancer** :5900 (VNC → x11vnc, `-nopw`), mapped
+  `127.0.0.1:5900:5900@loadbalancer`. On a running cluster the port was added with
+  `k3d cluster edit k3rdp --port-add "127.0.0.1:5900:5900@loadbalancer"` (recreates
+  the serverlb). Both RDP and VNC are raw TCP, so Traefik ingress is not used.
 - `x11rdp-display` — **ClusterIP** :6000. X11 display `:0` = TCP port `6000`; the
   Qt pod connects via `DISPLAY=x11rdp-display.k3rdp.svc.cluster.local:0`.
 

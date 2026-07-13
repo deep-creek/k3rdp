@@ -7,5 +7,6 @@ resources:
   - namespace.yaml
   - x11rdp-deployment.yaml
   - x11rdp-service-rdp.yaml
+  - x11rdp-service-vnc.yaml
   - x11rdp-service-display.yaml
   - qtapp-deployment.yaml

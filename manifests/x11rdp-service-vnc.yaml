@@ -1,0 +1,21 @@
+# External VNC entry point. type: LoadBalancer so k3s servicelb (klipper)
+# exposes it, and the k3d serverlb forwards host localhost:5900 to it
+# (see scripts/create-cluster.sh / `k3d cluster edit --port-add`).
+# x11vnc exports the same shared display :0 that xrdp serves over RDP, so VNC and
+# RDP are two front-ends onto one screen.
+apiVersion: v1
+kind: Service
+metadata:
+  name: x11rdp-vnc
+  namespace: k3rdp
+  labels:
+    app: x11rdp
+spec:
+  type: LoadBalancer
+  selector:
+    app: x11rdp
+  ports:
+    - name: vnc
+      port: 5900
+      targetPort: 5900
+      protocol: TCP

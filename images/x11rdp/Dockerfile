@@ -39,7 +39,7 @@ ENV DISPLAY_NUM=0 \
     SCREEN_DPI=96 \
     VNC_PORT=5900
 
-# 3389 = RDP (external), 6000 = X11 display :0 over TCP (cluster-internal).
-EXPOSE 3389 6000
+# 3389 = RDP (external), 5900 = VNC (external), 6000 = X11 :0 (cluster-internal).
+EXPOSE 3389 5900 6000
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]

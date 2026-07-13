@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 #
-# create-cluster.sh — create the k3d cluster and map the host RDP port into it.
+# create-cluster.sh — create the k3d cluster and map the host access ports in.
 #
-# Host localhost:3389 is forwarded by the k3d serverlb to the LoadBalancer
-# Service (k3s servicelb/klipper). RDP is raw TCP, so Traefik ingress is not used.
+# Host localhost:3389 (RDP) and localhost:5900 (VNC) are forwarded by the k3d
+# serverlb to the LoadBalancer Services (k3s servicelb/klipper). Both are raw
+# TCP, so Traefik ingress is not used. Ports bind to 127.0.0.1 only (loopback).
 #
 set -euo pipefail
 
@@ -14,9 +15,10 @@ if k3d cluster list "${CLUSTER}" >/dev/null 2>&1; then
   exit 0
 fi
 
-echo "==> Creating k3d cluster '${CLUSTER}' (host :3389 -> RDP LoadBalancer)"
+echo "==> Creating k3d cluster '${CLUSTER}' (host :3389 RDP + :5900 VNC)"
 k3d cluster create "${CLUSTER}" \
-  --port "3389:3389@loadbalancer" \
+  --port "127.0.0.1:3389:3389@loadbalancer" \
+  --port "127.0.0.1:5900:5900@loadbalancer" \
   --wait
 
 echo "==> Nodes:"

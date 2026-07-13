@@ -13,8 +13,8 @@ from a separate pod over TCP.
         │  Xvfb :0  (1024x1024x24, -dpi 96, -listen tcp, -ac)    │◄── X11 TCP :6000
         │     ▲ shared display :0                                 │      │  (ClusterIP
         │  icewm (kiosk WM)                                       │      │   Service
-        │  x11vnc  ──► :5900  (-nopw, -shared, -forever)          │      │   :6000)
-        │  xrdp    ──► :3389  (libvnc.so module → 127.0.0.1:5900) │      │
+        │  x11vnc  ──► :5900  (-nopw, -shared)  ── exposed (VNC) ─┼──►   │   :6000)
+        │  xrdp    ──► :3389  (libvnc.so → 127.0.0.1:5900) (RDP) ─┼──►   │
         └────────────────────────────────────────────────────────┘      │
                                                                           │
         ┌───────────────────── Pod: qtapp ──────────────────────┐        │
@@ -23,7 +23,8 @@ from a separate pod over TCP.
         └────────────────────────────────────────────────────────┘
 ```
 
-**Display:** 1024×1024, 24-bit, 96 DPI. **RDP auth:** none (auto-attaches).
+**Display:** 1024×1024, 24-bit, 96 DPI. **Access:** RDP (`localhost:3389`) *or*
+VNC (`localhost:5900`) — both view the same shared display. **Auth:** none.
 **Window mode:** kiosk — IceWM shows a single **borderless, fullscreen** app with
 no taskbar or decorations.
 
@@ -43,11 +44,12 @@ with **x11vnc**, and puts **xrdp** (its `libvnc.so` module) in front to speak RD
 ## Quick start
 
 ```bash
-sudo ./setup.sh                 # installs kubectl, kustomize, helm, freerdp (dnf) + k3d (/usr/bin)
-scripts/create-cluster.sh       # create the k3d cluster, map host :3389
+sudo ./setup.sh                 # installs kubectl, kustomize, helm, freerdp, tigervnc (dnf) + k3d (/usr/bin)
+scripts/create-cluster.sh       # create the k3d cluster, map host :3389 (RDP) + :5900 (VNC)
 scripts/build-images.sh         # build x11rdp + qtapp images, import into k3d
 scripts/deploy.sh               # apply manifests, wait for pods
-scripts/connect.sh              # open an RDP session to localhost:3389
+scripts/connect-rdp.sh          # open an RDP session to localhost:3389
+scripts/connect-vnc.sh          # …or a VNC session to localhost:5900
 ```
 
 Tear everything down:
@@ -56,16 +58,24 @@ Tear everything down:
 scripts/destroy.sh              # delete the k3d cluster
 ```
 
-## Connecting an RDP client
+## Connecting (RDP or VNC)
 
-`scripts/connect.sh` uses `xfreerdp`. Any RDP client works — point it at
-`localhost:3389`, no username/password required, e.g.:
+xrdp and x11vnc are two front-ends onto the **same** shared display `:0`, so RDP
+and VNC show identical content. Both are exposed on loopback with no password.
+
+**RDP** — `scripts/connect-rdp.sh` (uses `xfreerdp`). Any RDP client works against
+`localhost:3389`:
 
 ```bash
-xfreerdp /v:localhost:3389 /size:1024x1024 /cert:ignore
+xfreerdp /v:localhost:3389 /size:1024x1024 /cert:ignore   # Remmina, mstsc, … also work
 ```
 
-(Remmina, Windows `mstsc`, etc. also work against `localhost:3389`.)
+**VNC** — `scripts/connect-vnc.sh` (uses `vncviewer`). Any VNC client works against
+`localhost:5900`:
+
+```bash
+vncviewer localhost::5900        # no password
+```
 
 ## Verifying it works
 
@@ -119,14 +129,15 @@ Match the RDP client `/size:` accordingly.
 | Path | Purpose |
 |------|---------|
 | `setup.sh` | Install tooling (dnf packages + k3d binary in `/usr/bin`). |
-| `scripts/` | `create-cluster`, `build-images`, `deploy`, `connect`, `destroy`. |
+| `scripts/` | `create-cluster`, `build-images`, `deploy`, `connect-rdp`, `connect-vnc`, `destroy`. |
 | `images/x11rdp/` | Xvfb + icewm + x11vnc + xrdp image and its config. |
 | `images/qtapp/` | Sample Qt6 Widgets app + multi-stage build. |
 | `manifests/` | Kustomize: namespace, deployments, RDP + display services. |
 
 ## Security note (dev-only)
 
-`Xvfb -ac` disables X access control, and RDP requires no login. This is safe
-here because the X11 display is only reachable via a **ClusterIP** Service inside
-the cluster, and RDP is bound to `localhost` on your machine. Do **not** expose
-this to untrusted networks without adding authentication.
+`Xvfb -ac` disables X access control, and **both RDP and VNC require no login**
+(x11vnc runs `-nopw`). This is safe here because the X11 display is only reachable
+via a **ClusterIP** Service inside the cluster, and the RDP (3389) and VNC (5900)
+ports are bound to `127.0.0.1` on your machine. Do **not** expose this to
+untrusted networks without adding authentication.

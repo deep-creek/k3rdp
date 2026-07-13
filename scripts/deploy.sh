@@ -21,4 +21,4 @@ echo
 echo "==> Services:"
 kubectl -n "${NS}" get svc
 echo
-echo "Deployed. Connect an RDP client with:  scripts/connect.sh"
+echo "Deployed. Connect with:  scripts/connect-rdp.sh  (RDP)  or  scripts/connect-vnc.sh  (VNC)"

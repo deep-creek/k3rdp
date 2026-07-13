@@ -38,8 +38,9 @@ if [[ -z "${KUBECTL_PKG}" ]]; then
 fi
 echo "    Using: ${KUBECTL_PKG}"
 
-echo "==> Installing Fedora packages (kubectl, kustomize, helm, freerdp)"
-dnf install -y "${KUBECTL_PKG}" kustomize helm freerdp
+echo "==> Installing Fedora packages (kubectl, kustomize, helm, freerdp, tigervnc)"
+# freerdp -> xfreerdp (RDP client); tigervnc -> vncviewer (VNC client)
+dnf install -y "${KUBECTL_PKG}" kustomize helm freerdp tigervnc
 
 # k3d is not in the Fedora repos. Install its official binary into /usr/bin
 # (per requirement: not /usr/local). The upstream installer honors K3D_INSTALL_DIR.

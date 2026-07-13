@@ -31,6 +31,8 @@ spec:
           ports:
             - name: rdp
               containerPort: 3389
+            - name: vnc
+              containerPort: 5900
             - name: x11
               containerPort: 6000
           readinessProbe:
