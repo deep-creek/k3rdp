@@ -40,5 +40,6 @@ exec x11vnc \
   -nopw \
   -rfbport "${VNC_PORT}" \
   -noxdamage \
+  -nowireframe \
   -xkb \
   -repeat

@@ -124,6 +124,33 @@ Display geometry is env-driven on the `x11rdp` Deployment
 `SCREEN_DPI`. Update, then `kubectl apply -k manifests` and restart the pod.
 Match the RDP client `/size:` accordingly.
 
+## Troubleshooting
+
+**Dragging a window shows only an outline/rectangle, not its contents.** Two
+independent layers can each cause this, and both are configured to avoid it:
+
+1. **x11vnc wireframe mode** — x11vnc enables `-wireframe` *by default*: while a
+   window is being moved it suppresses the live pixel stream and sends the remote
+   client just an outline, filling in the real window only when you drop it (a
+   bandwidth optimization). Disabled here via **`-nowireframe`** in
+   `images/x11rdp/start-x11.sh`. This is the usual culprit, since it affects both
+   RDP and VNC regardless of the window manager.
+2. **IceWM opaque move** — if IceWM does outline-move, the X server itself only
+   draws an XOR outline during the drag (which x11vnc then faithfully streams).
+   Forced off via **`OpaqueMove=1`** / **`OpaqueResize=1`** in
+   `images/x11rdp/icewm/preferences`.
+
+If drags ever show only a rectangle again, verify both are still in effect:
+
+```bash
+kubectl -n k3rdp exec deploy/x11rdp -- bash -c 'ps -eo args | grep "[x]11vnc"'            # expect -nowireframe
+kubectl -n k3rdp exec deploy/x11rdp -- bash -c 'DISPLAY=:0 icewm --postpreferences | grep OpaqueMove'
+```
+
+Trade-off: with these off, every intermediate frame of a drag is streamed, so
+moving a large window over a slow link feels heavier than the instant outline. On
+loopback it stays smooth.
+
 ## Layout
 
 | Path | Purpose |

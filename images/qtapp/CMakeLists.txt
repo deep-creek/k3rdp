@@ -6,8 +6,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
+find_package(X11 REQUIRED)
 
-add_executable(qtapp src/main.cpp)
-target_link_libraries(qtapp PRIVATE Qt6::Widgets)
+add_executable(qtapp src/main.cpp src/wmclass.cpp)
+target_link_libraries(qtapp PRIVATE Qt6::Widgets X11::X11)
 
 install(TARGETS qtapp RUNTIME DESTINATION bin)

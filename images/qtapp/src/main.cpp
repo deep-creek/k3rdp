@@ -14,12 +14,17 @@
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QWidget>
+#include <QDialog>
 #include <QTimer>
 #include <QTime>
 #include <QFont>
 #include <QString>
 #include <QPoint>
 #include <QDebug>
+
+// Defined in wmclass.cpp (kept separate so <X11/Xlib.h> macros don't clash with Qt).
+// Sets WM_CLASS on a created-but-unmapped X window.
+void setWmClass(unsigned long window, const char *nameAndClass);
 
 // Build the panel: a heading, the screen info, a live clock, and a mouse-position
 // label (returned via `mouseLabelOut` so the caller can update it from a timer).
@@ -74,6 +79,46 @@ static QWidget *makePanel(const QString &title, const QString &info, QLabel **mo
     return w;
 }
 
+// A small decorated, movable dialog so the opaque-move behavior can be exercised
+// (the fullscreen main window has no title bar to grab). It carries busy, contrasty
+// content so that while dragging you can plainly see whether the contents follow the
+// cursor (OpaqueMove=1) or only an outline does.
+static QDialog *makeMovableDialog(QWidget *parent)
+{
+    auto *d = new QDialog(parent);
+    d->setWindowTitle("Drag me — opaque-move test");
+    // Not modal, so it can sit over the fullscreen window and be dragged freely.
+    d->setModal(false);
+    d->resize(360, 220);
+
+    auto *layout = new QVBoxLayout(d);
+    layout->setContentsMargins(24, 24, 24, 24);
+    layout->setSpacing(16);
+
+    auto *heading = new QLabel("Grab my title bar and drag");
+    QFont hf = heading->font();
+    hf.setPointSize(14);
+    hf.setBold(true);
+    heading->setFont(hf);
+    heading->setWordWrap(true);
+
+    auto *body = new QLabel(
+        "If OpaqueMove works you see this text move with the window.\n"
+        "If it doesn't, you only see the border while dragging.");
+    body->setWordWrap(true);
+
+    // A striped background makes ghost-vs-opaque obvious at a glance while moving.
+    d->setStyleSheet(
+        "QDialog { background: qlineargradient(x1:0 y1:0, x2:1 y2:1,"
+        " stop:0 #1e3a8a, stop:1 #9d174d); }"
+        "QLabel { color: white; }");
+
+    layout->addWidget(heading);
+    layout->addWidget(body);
+    layout->addStretch();
+    return d;
+}
+
 static QString screenInfo(const QScreen *s)
 {
     const QRect g = s->geometry();
@@ -97,6 +142,16 @@ int main(int argc, char **argv)
     QWidget *w = makePanel("Qt over X11/RDP", screenInfo(s), &mouseLabel);
     // Borderless fullscreen kiosk window (IceWM honors _NET_WM_STATE_FULLSCREEN).
     w->showFullScreen();
+
+    // A movable dialog on top, so the opaque-move fix can be exercised by dragging.
+    QDialog *dlg = makeMovableDialog(w);
+    dlg->move(120, 120);
+    // Force native window creation (still unmapped), then give it a WM_CLASS distinct
+    // from "qtapp" so the kiosk winoptions don't strip its title bar — leaving IceWM's
+    // default decoration, which is what makes it draggable. Must happen before show().
+    dlg->winId();
+    setWmClass(dlg->winId(), "qtdialog");
+    dlg->show();
 
     // Continuously show the mouse position. Polling QCursor::pos() tracks the X
     // pointer without needing focus or mouse-tracking on the widget.

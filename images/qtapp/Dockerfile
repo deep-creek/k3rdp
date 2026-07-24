@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
         cmake \
         qt6-base-dev \
+        libx11-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /src
@@ -24,6 +25,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libqt6gui6 \
         libqt6core6 \
         qt6-qpa-plugins \
+        libx11-6 \
         libxcb-cursor0 \
         libxcb-xinerama0 \
         libxcb-icccm4 \
